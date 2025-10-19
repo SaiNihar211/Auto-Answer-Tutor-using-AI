@@ -1,0 +1,276 @@
+{
+  "name": "google tasks",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "a2c75274-27ce-49e1-9404-ca71c0e75f9c",
+      "name": "check for new mail",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "C0XqOxVB8koXdBCo",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "messageId": "={{ $json.id }}"
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "d26998f3-eddc-4231-a6a9-56c0a1c88db4",
+      "name": "Get a message",
+      "webhookId": "f563094c-6726-4d2b-bc0f-94d8041031a0",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "C0XqOxVB8koXdBCo",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an email-responding agent.\n\nBelow is the content of the latest email I got.\n\nSubject: {{ $json.Subject }}\n\nBody: {{ $json.snippet }}\n\n\nYou have to do 2 things:\n\n1. Specify the label based on the email.\n\nLabels can be one of the below:\ndoubts\n\n2. As a smart assistant, please draft a message so that I can reply to my mail.\n\nMake sure the reply is respectful, and please provide the explanation to the student in-depth with the best concepts and examples. The reply should be in strict text format and easy to read. In the best regards add name \"Sai Nihar\"",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "c60be6df-99b2-4153-a722-17cbad6f0a98",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        288,
+        208
+      ],
+      "id": "22c148b7-bf09-48ef-9fbb-4e5a8d9486fb",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "FFcDATwFnvZmprEv",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"labels\": \"doubts\",\n\t\"reply\": \"Hey, Thanks for reaching me\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        592,
+        208
+      ],
+      "id": "a85ceace-15dd-4f09-bdd5-6c9c8862a416",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Get a message').item.json.From }}",
+        "subject": "={{ $('Get a message').item.json.Subject }}",
+        "emailType": "text",
+        "message": "={{ $json.output.reply }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        768,
+        0
+      ],
+      "id": "634d9725-a4a5-471f-bfe9-e2d7a844e8a5",
+      "name": "Send a message",
+      "webhookId": "463a3e89-44e2-4640-97e3-046acbb75b03",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "C0XqOxVB8koXdBCo",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "the first one is gmail trigger ",
+        "height": 80,
+        "width": 150
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -48,
+        160
+      ],
+      "typeVersion": 1,
+      "id": "57accf38-1a90-4070-8617-2156be06879e",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "need to give about the response prompt to openAI",
+        "height": 80,
+        "width": 150
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        128,
+        192
+      ],
+      "typeVersion": 1,
+      "id": "71e3a170-adf6-497a-a0e7-04ca23bc262d",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "parser is used to align the prompt",
+        "height": 80,
+        "width": 176
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        672,
+        224
+      ],
+      "typeVersion": 1,
+      "id": "c1fd792e-962c-4c8c-b1bc-a149c13c1ea0",
+      "name": "Sticky Note2"
+    }
+  ],
+  "pinData": {
+    "check for new mail": [
+      {
+        "json": {
+          "id": "199fd7188f7eec36",
+          "threadId": "199fd7188f7eec36",
+          "snippet": "please help and provide data structure road map",
+          "payload": {
+            "mimeType": "multipart/alternative"
+          },
+          "sizeEstimate": 5833,
+          "historyId": "39822",
+          "internalDate": "1760893688000",
+          "labels": [
+            {
+              "id": "INBOX",
+              "name": "INBOX"
+            },
+            {
+              "id": "CATEGORY_PERSONAL",
+              "name": "CATEGORY_PERSONAL"
+            },
+            {
+              "id": "UNREAD",
+              "name": "UNREAD"
+            }
+          ],
+          "From": "Ragav Sai Nihar <ragavsainihar211@gmail.com>",
+          "Subject": "doubts",
+          "To": "\"sainihar727@gmail.com\" <sainihar727@gmail.com>"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "check for new mail": {
+      "main": [
+        [
+          {
+            "node": "Get a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a message": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "07c7d178-485d-4d93-a53c-53559288bc1b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b48ebc76bf6fa816238a6d4f29c204986a8b980945588c2ad84fe3ac6f44265c"
+  },
+  "id": "3Vumw8Gfh438Cl7G",
+  "tags": []
+}
